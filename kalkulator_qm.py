@@ -225,3 +225,4 @@ if tombol_proses:
                 grup_huruf_pos.append(f"({ ' + '.join(komponen_sum) })")
                 
             st.success(f"**Alternatif {index + 1} :** Y = {''.join(grup_huruf_pos)}")
+            
