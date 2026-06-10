@@ -10,36 +10,65 @@ st.markdown("<h2 style='text-align: center;'>💻 PROGRAM KELOMPOK 8</h2>", unsa
 st.markdown("<h3 style='text-align: center; color: #4CAF50;'>KALKULATOR Quine McCluskey method POS</h3>", unsafe_allow_html=True)
 st.markdown("---")
 
-col1, col2, col3 = st.columns(3)
+# Baris Atas: Input Jumlah Variabel
+jumlah_variabel = st.number_input(
+    "Masukkan jumlah variabel (Minimal 6):", 
+    min_value=6, 
+    value=6, 
+    step=1
+)
 
-with col1:
-    jumlah_variabel = st.number_input("Masukkan jumlah variabel (Minimal 6):", min_value=6, value=6, step=1)
+# Hitung rentang maksimum
+rentang = (2 ** jumlah_variabel) - 1
+st.info(f"💡 Rentang maksimal desimal yang valid: **0 - {rentang}**")
 
-with col2:
-    input_maxterm = st.text_input("Masukkan nilai Maxterm (Contoh: 0,1,2):", value="0,1,2")
+# Baris Bawah: Dua Kolom Berdampingan untuk Maxterm dan Don't Care
+col_input1, col_input2 = st.columns(2)
 
-with col3:
-    input_dont_care = st.text_input("Masukkan nilai Don't Care (Isi 0 jika tidak ada):", value="0")
+with col_input1:
+    input_maxterm = st.text_input("Nilai Maxterm (Pisahkan dengan koma):", placeholder="Contoh: 0,1,2")
+
+with col_input2:
+    input_dont_care = st.text_input("Nilai Don't Care (Kosongkan jika tidak ada):", placeholder="Contoh: 3,4")
+
+# Tombol Eksekusi di Bawah Kolom Input
+st.markdown(" ")
+tombol_proses = st.button("Sederhanakan Fungsi", type="primary", use_container_width=True)
+st.markdown("---")
 
 # =========================================================
-# DATA AWAL & TOMBOL SEDERHANAKAN (KONFIRMASI TUNGGAL)
+# PROSES UTAMA LOGIKA QUINE-MCCLUSKEY
 # =========================================================
-try:
-    daftar_maxterm = [int(x) for x in input_maxterm.split(",") if x.strip() != ""]
-    daftar_dont_care = [int(x) for x in input_dont_care.split(",") if x.strip() != ""]
-except ValueError:
-    st.error("❌ Error: Format input salah! Pastikan hanya angka dan koma saja.")
-    st.stop()
-
-st.info(f"**Data Awal Ditampung:** \n* **Maxterm Asli:** {daftar_maxterm} \n* **Don't Care:** {daftar_dont_care}")
-
-st.markdown("### 📋 MENU OPSI:")
-tombol_proses = st.button("👉 [1] Sederhanakan Fungsi (Metode Quine-McCluskey)", type="primary")
-
-# Jika tombol diklik, proses hitung baru berjalan
 if tombol_proses:
-    with st.spinner("Memproses... Silakan tunggu hasil perhitungan."):
+    # --- Validasi Maxterm ---
+    if not input_maxterm.strip():
+        st.error("❌ Error: Maxterm tidak boleh kosong!")
+        st.stop()
         
+    try:
+        daftar_maxterm = [int(x) for x in input_maxterm.split(",") if x.strip() != ""]
+        hasil_maks = max(daftar_maxterm)
+        if hasil_maks > rentang:
+            st.error(f"❌ Error: Ada maxterm yang melebihi rentang (Maksimal {rentang})!")
+            st.stop()
+    except ValueError:
+        st.error("❌ Error: Format Maxterm salah! Pastikan hanya angka dan koma.")
+        st.stop()
+
+    # --- Validasi Don't Care ---
+    daftar_dont_care = []
+    if input_dont_care.strip():
+        try:
+            daftar_dont_care = [int(x) for x in input_dont_care.split(",") if x.strip() != ""]
+            if daftar_dont_care:
+                hasil_maks_dc = max(daftar_dont_care)
+                if hasil_maks_dc > rentang:
+                    st.error(f"❌ Error: Ada Don't Care yang melebihi rentang (Maksimal {rentang})!")
+                    st.stop()
+        except ValueError:
+            st.error("❌ Error: Format Don't Care salah! Pastikan hanya angka dan koma.")
+            st.stop()
+            
         # PROSES KONVERSI BINER
         biner_maxterm = [format(angka, f'0{jumlah_variabel}b') for angka in daftar_maxterm]
         biner_dont_care = [format(angka, f'0{jumlah_variabel}b') for angka in daftar_dont_care]
